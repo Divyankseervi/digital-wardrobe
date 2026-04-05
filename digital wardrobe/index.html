@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Dashboard</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card hero" aria-labelledby="home-hero">
+          <div>
+            <h2 id="home-hero">Your personal closet — organized like a dashboard</h2>
+            <p>
+              <strong>Digital Wardrobe</strong> helps you store clothing photos, save details (category, color, tags),
+              and track how often you wear items — so planning outfits gets easier over time.
+            </p>
+
+            <div class="cta-row">
+              <a class="primary-button" href="add.html" style="text-decoration:none;">Add Clothing Item</a>
+              <a class="ghost-button" href="wardrobe.html">View Wardrobe</a>
+            </div>
+            <p class="wardrobe-subtitle" style="margin-top:0.75rem;">
+              Built as a student project using Supabase + Cloudinary. Works best with Live Server.
+            </p>
+          </div>
+
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">Key Features</h2>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-title">Add Items with Photos</div>
+              <div class="feature-text">Upload clothing images and store category, color, and tags.</div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-title">Wardrobe Grid</div>
+              <div class="feature-text">Browse your collection in a clean, responsive card grid.</div>
+            </div>
+            <div class="feature-card">
+              <div class="feature-title">Wear Tracking</div>
+              <div class="feature-text">Tap “Mark as Worn” to increase wear count and see top items.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">How It Works</h2>
+          <div class="details-grid">
+            <div>
+              <p class="wardrobe-subtitle"><strong>Step-by-step</strong></p>
+              <ul class="list">
+                <li>Open <strong>Add Item</strong> and upload a photo.</li>
+                <li>Choose category + enter color and tags.</li>
+                <li>The image is stored in <strong>Cloudinary</strong> and the item details go to
+                  <strong>Supabase</strong>.
+                </li>
+                <li>In <strong>Wardrobe</strong>, view items and mark them as worn.</li>
+              </ul>
+            </div>
+            <div>
+              <p class="wardrobe-subtitle"><strong>Designed for</strong></p>
+              <ul class="list">
+                <li>Students building a portfolio project</li>
+                <li>Anyone who wants quick outfit organization</li>
+                <li>Future upgrades: filters, search, analytics, calendar</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="wardrobe-section-header">
+            <div>
+              <h2 class="section-heading">🔥 Most Worn</h2>
+              <p class="wardrobe-subtitle">Top 3 items by times worn.</p>
+            </div>
+          </div>
+
+          <div class="wardrobe-grid" id="mostWornGrid"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div>
+      <strong>Digital Wardrobe</strong> — Project Website
+    </div>
+    <div style="margin-top:0.25rem;">
+      Pages: <a href="index.html">Home</a> · <a href="add.html">Add</a> · <a href="wardrobe.html">Wardrobe</a>
+    </div>
+    <div style="margin-top:0.25rem; font-size:0.85rem; opacity:0.9;">
+      © <span id="year"></span> Digital Wardrobe. All rights reserved.
+    </div>
+  </footer>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    import { loadMostWorn } from "./insights.js";
+    await requireAuth();
+    setupLogoutButton();
+    loadMostWorn();
+  </script>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

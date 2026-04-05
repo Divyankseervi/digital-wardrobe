@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Wardrobe</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section>
+          <div class="wardrobe-section-header">
+            <div>
+              <h2 class="section-heading">🔥 Most Worn</h2>
+              <p class="wardrobe-subtitle">Top 3 items by times worn.</p>
+            </div>
+          </div>
+          <div class="wardrobe-grid" id="mostWornGrid"></div>
+        </section>
+
+        <section aria-labelledby="wardrobe-title">
+          <div class="wardrobe-section-header">
+            <div>
+              <h2 id="wardrobe-title" class="section-heading">All Items</h2>
+              <p class="wardrobe-subtitle">Click “Mark as Worn” to increase the count.</p>
+            </div>
+          </div>
+
+          <div class="wardrobe-grid" id="wardrobeGrid"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    import { loadClothes } from "./wardrobe.js";
+    import { loadMostWorn } from "./insights.js";
+
+    await requireAuth();
+    setupLogoutButton();
+    loadMostWorn();
+    loadClothes();
+  </script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

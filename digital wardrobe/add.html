@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Add Item</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="form-card card" aria-labelledby="add-item-title">
+          <h2 id="add-item-title" class="section-heading">Add Clothing Item</h2>
+          <p class="wardrobe-subtitle">Upload a picture and enter details.</p>
+
+          <form onsubmit="return false;">
+            <div class="form-grid">
+              <div class="full-width">
+                <label for="imageInput">Clothing image</label>
+                <input type="file" id="imageInput" accept="image/*" />
+                <p class="helper-text">Choose a clear photo (JPG/PNG).</p>
+              </div>
+
+              <div class="full-width">
+                <label>How do you want to set the category?</label>
+                <div style="display:flex; flex-wrap:wrap; gap:0.75rem; font-size:0.85rem;">
+                  <label style="display:flex; align-items:center; gap:0.35rem;">
+                    <input type="radio" name="catMode" id="mode-ai" value="ai" checked />
+                    <span>Let AI detect from image (Clarifai)</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:0.35rem;">
+                    <input type="radio" name="catMode" id="mode-manual" value="manual" />
+                    <span>I will choose manually</span>
+                  </label>
+                </div>
+                <p class="helper-text">Both options save to the backend in the same format.</p>
+              </div>
+
+              <div>
+                <label for="categoryInput">Category</label>
+                <select id="categoryInput">
+                  <option value="">Select category</option>
+                  <option value="shirt">Shirt</option>
+                  <option value="pant">Pant</option>
+                  <option value="shoes">Shoes</option>
+                  <option value="jacket">Jacket</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="colorInput">Color</label>
+                <input type="text" id="colorInput" placeholder="Color" />
+              </div>
+
+              <div class="full-width">
+                <label for="tagsInput">Tags</label>
+                <input type="text" id="tagsInput" placeholder="casual, gym, office" />
+              </div>
+            </div>
+
+            <button type="button" id="addBtn" class="primary-button">Add Item</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./supabase.js";
+    import { requireAuth, setupLogoutButton, getCurrentUser } from "./auth.js";
+    import { uploadImageToSupabase } from "./storage.js";
+    import { analyzeImage } from "./ai-service.js";
+
+    const user = await requireAuth();
+    setupLogoutButton();
+
+    const imageInput = document.getElementById("imageInput");
+    const categoryInput = document.getElementById("categoryInput");
+    const colorInput = document.getElementById("colorInput");
+    const tagsInput = document.getElementById("tagsInput");
+    const addBtn = document.getElementById("addBtn");
+    const modeAi = document.getElementById("mode-ai");
+    const modeManual = document.getElementById("mode-manual");
+
+    // Toggle manual dropdown enabled/disabled based on mode
+    function updateCategoryMode() {
+      if (modeManual.checked) {
+        categoryInput.disabled = false;
+      } else {
+        categoryInput.disabled = true;
+      }
+    }
+
+    updateCategoryMode();
+    modeAi.addEventListener("change", updateCategoryMode);
+    modeManual.addEventListener("change", updateCategoryMode);
+
+    addBtn.addEventListener("click", async () => {
+      try {
+        console.log("=== STEP 1: Button clicked ===");
+        const file = imageInput.files[0];
+        if (!file) {
+          alert("Select an image first");
+          return;
+        }
+        console.log("File selected:", file.name, file.size, "bytes");
+
+        addBtn.disabled = true;
+        addBtn.textContent = "Uploading...";
+
+        // 1. Upload to Supabase Storage
+        console.log("=== STEP 2: Uploading to Supabase Storage ===");
+        const imageUrl = await uploadImageToSupabase(file);
+        console.log("Upload done. Image URL:", imageUrl);
+
+        let category = "";
+        let detectedColor = "";
+        let detectedFormality = "";
+
+        if (modeManual.checked) {
+          // User chooses manually – require a value
+          category = categoryInput.value;
+          if (!category) {
+            alert("Please select a category, or switch to AI detection.");
+            return;
+          }
+        } else {
+          // AI mode
+          console.log("=== STEP 3: Calling Python AI (/analyze-base64) ===");
+          addBtn.textContent = "Analyzing...";
+          const analysis = await analyzeImage(file);
+          console.log("AI Analysis result:", JSON.stringify(analysis));
+
+          if (analysis && analysis.category) {
+            category = analysis.category.toLowerCase();
+            console.log("Detected category:", category);
+            // Map known categories to dropdown values if possible
+            if (category.includes("shirt") || category.includes("top") || category.includes("jersey") || category.includes("polo")) categoryInput.value = "shirt";
+            else if (category.includes("pant") || category.includes("jean") || category.includes("trouser") || category.includes("short") || category.includes("skirt") || category.includes("chino")) categoryInput.value = "pant";
+            else if (category.includes("shoe") || category.includes("sneaker") || category.includes("boot") || category.includes("loafer") || category.includes("sandal")) categoryInput.value = "shoes";
+            else if (category.includes("jacket") || category.includes("coat") || category.includes("hoodie") || category.includes("blazer") || category.includes("sweatshirt")) categoryInput.value = "jacket";
+            else categoryInput.value = ""; // Other/Unknown
+
+            detectedColor = analysis.color;
+            detectedFormality = analysis.formality;
+          } else {
+            category = "other";
+            console.log("AI returned no category, using 'other'");
+          }
+        }
+
+        // Fill in detected details if empty
+        if (!colorInput.value && detectedColor) colorInput.value = detectedColor;
+        if (!tagsInput.value && detectedFormality) tagsInput.value = detectedFormality;
+
+        // Use the mapped value from dropdown if set, otherwise the raw string
+        const finalCategory = categoryInput.value || category;
+
+        console.log("=== STEP 4: Inserting into Supabase DB ===");
+        console.log("Data:", { image_url: imageUrl, category: finalCategory, color: colorInput.value, tags: tagsInput.value, user_id: user.id });
+
+        const { error } = await supabase.from('clothes').insert([{
+          image_url: imageUrl,
+          category: finalCategory,
+          color: colorInput.value,
+          tags: tagsInput.value,
+          times_worn: 0,
+          user_id: user.id
+        }]);
+
+        if (error) {
+          console.error("=== SUPABASE INSERT ERROR ===", error);
+          throw error;
+        }
+
+        console.log("=== STEP 5: SUCCESS ===");
+        alert("Item added successfully!");
+        window.location.href = "wardrobe.html";
+      } catch (e) {
+        console.error("=== CAUGHT ERROR ===", e);
+        alert("Error: " + (e.message || JSON.stringify(e) || "Something went wrong."));
+      } finally {
+        addBtn.disabled = false;
+        addBtn.textContent = "Add Item";
+      }
+    });
+  </script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

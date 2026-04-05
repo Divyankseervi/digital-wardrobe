@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital Wardrobe - Login</title>
+    <meta name="description" content="Sign in or create an account for your Digital Wardrobe." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* ── Login Page Styles ── */
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 60px rgba(124, 58, 237, 0.1);
+            border: 1px solid var(--glass-border);
+            animation: cardReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0.7;
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .auth-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tab toggle */
+        .auth-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.6rem;
+            text-align: center;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: var(--gradient-primary);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .auth-tab:not(.active):hover {
+            color: var(--text-primary);
+        }
+
+        /* Form */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .auth-form label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+        }
+
+        .auth-form input[type="email"],
+        .auth-form input[type="password"] {
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.92rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.08);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15), 0 0 20px rgba(124, 58, 237, 0.1);
+        }
+
+        .auth-form input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .auth-submit {
+            margin-top: 0.5rem;
+            padding: 0.85rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--gradient-primary);
+            background-size: 200% auto;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-submit::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .auth-submit:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.6);
+        }
+
+        .auth-submit:hover::before {
+            left: 100%;
+        }
+
+        .auth-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Messages */
+        .auth-message {
+            text-align: center;
+            font-size: 0.85rem;
+            padding: 0.6rem;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-message.show {
+            display: block;
+        }
+
+        .auth-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .auth-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Decorative orbs */
+        .auth-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-orb--1 {
+            width: 300px;
+            height: 300px;
+            background: rgba(124, 58, 237, 0.2);
+            top: 10%;
+            left: 10%;
+            animation: orbFloat 15s ease-in-out infinite alternate;
+        }
+
+        .auth-orb--2 {
+            width: 250px;
+            height: 250px;
+            background: rgba(6, 182, 212, 0.15);
+            bottom: 10%;
+            right: 10%;
+            animation: orbFloat 12s ease-in-out infinite alternate-reverse;
+        }
+
+        /* Google button */
+        .google-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.2rem 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .google-divider::before,
+        .google-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .google-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .google-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .google-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-orb auth-orb--1"></div>
+    <div class="auth-orb auth-orb--2"></div>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-logo">👕</div>
+            <div class="auth-title">Digital Wardrobe</div>
+            <div class="auth-subtitle">Your AI-powered closet organizer</div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab">Log In</button>
+                <button class="auth-tab" id="signupTab">Sign Up</button>
+            </div>
+
+            <!-- Message -->
+            <div class="auth-message" id="authMessage"></div>
+
+            <!-- Form -->
+            <form class="auth-form" id="authForm" onsubmit="return false;">
+                <div>
+                    <label for="emailInput">Email</label>
+                    <input type="email" id="emailInput" placeholder="you@example.com" required />
+                </div>
+                <div>
+                    <label for="passwordInput">Password</label>
+                    <input type="password" id="passwordInput" placeholder="••••••••" required minlength="6" />
+                </div>
+                <button type="submit" class="auth-submit" id="submitBtn">Log In</button>
+            </form>
+
+            <!-- Google divider -->
+            <div class="google-divider">or continue with</div>
+
+            <!-- Google Sign In -->
+            <button class="google-btn" id="googleBtn">
+                <svg viewBox="0 0 24 24">
+                    <path fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" />
+                    <path fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <script src="particles.js"></script>
+    <script type="module">
+        import { supabase } from "./supabase.js";
+
+        const loginTab = document.getElementById("loginTab");
+        const signupTab = document.getElementById("signupTab");
+        const submitBtn = document.getElementById("submitBtn");
+        const emailInput = document.getElementById("emailInput");
+        const passwordInput = document.getElementById("passwordInput");
+        const authMessage = document.getElementById("authMessage");
+        const googleBtn = document.getElementById("googleBtn");
+
+        let mode = "login"; // "login" or "signup"
+
+        // ── If already logged in, redirect ──
+        (async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) window.location.href = "index.html";
+            } catch (e) {
+                console.log("Auth check skipped:", e.message);
+            }
+        })();
+
+        // ── Tab switching ──
+        loginTab.addEventListener("click", () => {
+            mode = "login";
+            loginTab.classList.add("active");
+            signupTab.classList.remove("active");
+            submitBtn.textContent = "Log In";
+            hideMessage();
+        });
+
+        signupTab.addEventListener("click", () => {
+            mode = "signup";
+            signupTab.classList.add("active");
+            loginTab.classList.remove("active");
+            submitBtn.textContent = "Create Account";
+            hideMessage();
+        });
+
+        // ── Google sign-in ──
+        googleBtn.addEventListener("click", async () => {
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/index.html'
+                    }
+                });
+                if (error) throw error;
+            } catch (err) {
+                showMessage(err.message || "Google sign-in failed.", "error");
+            }
+        });
+
+        // ── Form submit ──
+        document.getElementById("authForm").addEventListener("submit", async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage("Please enter email and password.", "error");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = mode === "login" ? "Logging in..." : "Creating account...";
+
+            try {
+                if (mode === "signup") {
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+
+                    if (data.user && !data.user.confirmed_at && data.user.identities?.length === 0) {
+                        showMessage("This email is already registered. Try logging in.", "error");
+                    } else {
+                        showMessage("Account created! Check your email to confirm, then log in.", "success");
+                    }
+                } else {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+
+                    showMessage("Logged in! Redirecting...", "success");
+                    setTimeout(() => { window.location.href = "index.html"; }, 800);
+                }
+            } catch (err) {
+                showMessage(err.message || "Something went wrong.", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = mode === "login" ? "Log In" : "Create Account";
+            }
+        });
+
+        function showMessage(text, type) {
+            authMessage.textContent = text;
+            authMessage.className = `auth-message show ${type}`;
+        }
+
+        function hideMessage() {
+            authMessage.className = "auth-message";
+        }
+    </script>
+</body>
+
+</html>

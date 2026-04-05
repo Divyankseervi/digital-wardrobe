@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Digital Wardrobe</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <!-- Top header -->
+    <header>
+      <div class="header-inner">
+        <div>
+          <h1 class="title">My Digital Wardrobe</h1>
+          <p class="subtitle">Upload your outfits, track what you wear, and keep your style organized.</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="main-inner">
+        <!-- Section 1: Add Clothing Item -->
+        <section aria-labelledby="add-item-title" class="form-card card">
+          <h2 id="add-item-title" class="section-heading">Add Clothing Item</h2>
+          <p class="wardrobe-subtitle">Start by uploading a picture and describing the item. Later, you can track when you wear it.</p>
+
+          <form onsubmit="return false;">
+
+            <div class="form-grid">
+              <!-- Image upload -->
+              <div class="full-width">
+                <label for="item-image">Clothing image</label>
+                <input type="file" id="imageInput" accept="image/*" />
+                <p class="helper-text">Choose a clear photo of your clothing item (JPG, PNG).</p>
+              </div>
+
+              <!-- Category dropdown -->
+              <div>
+                <label for="category">Category</label>
+                <select id="categoryInput">
+                  <option value="">Select category</option>
+                  <option value="shirt">Shirt</option>
+                  <option value="pant">Pant</option>
+                  <option value="shoes">Shoes</option>
+                  <option value="jacket">Jacket</option>
+                </select>
+              </div>
+
+              <!-- Color input -->
+              <div>
+                <label for="color">Color</label>
+                <input type="text" id="colorInput" placeholder="e.g. Black, Blue, White" />
+              </div>
+
+              <!-- Tags input -->
+              <div class="full-width">
+                <label for="tags">Tags</label>
+                <input type="text" id="tagsInput" placeholder="e.g. casual, formal, gym, office, party" />
+
+                <p class="helper-text">Add a few keywords to describe when you wear this item.</p>
+              </div>
+            </div>
+
+            <button type="button" id="addBtn" class="primary-button">Add Item</button>
+          </form>
+        </section>
+<h2 class="section-heading">🔥 Most Worn</h2>
+<div class="wardrobe-grid" id="mostWornGrid"></div>
+
+        <!-- Section 2: Wardrobe Display Grid -->
+        <section aria-labelledby="wardrobe-title">
+          <div class="wardrobe-section-header">
+            <div>
+              <h2 id="wardrobe-title" class="section-heading">Your Wardrobe</h2>
+              <p class="wardrobe-subtitle">Here are a few sample items. Later, your real items will appear here.</p>
+            </div>
+          </div>
+
+<div class="wardrobe-grid" id="wardrobeGrid">
+            <!-- Dummy item 1 -->
+            <article class="item-card">
+              <div class="item-image">
+                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop" alt="White casual shirt" />
+              </div>
+              <div class="item-meta">
+                <div class="item-category">Shirt</div>
+                <div class="item-color">Color: White</div>
+                <div class="item-tags">Tags: casual, everyday</div>
+              </div>
+              <button class="secondary-button" type="button">Mark as Worn</button>
+            </article>
+
+            <!-- Dummy item 2 -->
+            <article class="item-card">
+              <div class="item-image">
+                <img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400&h=300&fit=crop" alt="Black formal pants" />
+              </div>
+              <div class="item-meta">
+                <div class="item-category">Pant</div>
+                <div class="item-color">Color: Black</div>
+                <div class="item-tags">Tags: formal, office</div>
+              </div>
+              <button class="secondary-button" type="button">Mark as Worn</button>
+            </article>
+
+            <!-- Dummy item 3 -->
+            <article class="item-card">
+              <div class="item-image">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" alt="Grey running shoes" />
+              </div>
+              <div class="item-meta">
+                <div class="item-category">Shoes</div>
+                <div class="item-color">Color: Grey</div>
+                <div class="item-tags">Tags: gym, running</div>
+              </div>
+              <button class="secondary-button" type="button">Mark as Worn</button>
+            </article>
+
+            <!-- Dummy item 4 -->
+            <article class="item-card">
+              <div class="item-image">
+                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=300&fit=crop" alt="Navy blue jacket" />
+              </div>
+              <div class="item-meta">
+                <div class="item-category">Jacket</div>
+                <div class="item-color">Color: Navy Blue</div>
+                <div class="item-tags">Tags: winter, travel</div>
+              </div>
+              <button class="secondary-button" type="button">Mark as Worn</button>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyArvs6eC78O-0yezxt6cyo1szhUcOJO9ZY",
+  authDomain: "digital-wardrobe-1a340.firebaseapp.com",
+  projectId: "digital-wardrobe-1a340",
+  storageBucket: "digital-wardrobe-1a340.firebasestorage.app",
+  messagingSenderId: "120714072692",
+  appId: "1:120714072692:web:189bd093bfb83800167721"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("addBtn").addEventListener("click", async () => {
+  const file = document.getElementById("imageInput").files[0];
+  const category = document.getElementById("categoryInput").value;
+  const color = document.getElementById("colorInput").value;
+  const tags = document.getElementById("tagsInput").value;
+
+  if (!file) {
+    alert("Select an image first");
+    return;
+  }
+
+  // Upload to Cloudinary
+  const imageUrl = await uploadImage(file);
+
+  // Save to Firestore
+  await addDoc(collection(db, "clothes"), {
+    image_url: imageUrl,
+    category: category,
+    color: color,
+    tags: tags,
+    times_worn: 0,
+    created_at: new Date()
+  });
+
+  alert("Item added successfully!");
+});
+import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+async function loadClothes() {
+  const querySnapshot = await getDocs(collection(db, "clothes"));
+  const grid = document.getElementById("wardrobeGrid");
+  grid.innerHTML = ""; // clear dummy items
+loadMostWorn();
+
+  querySnapshot.forEach((doc) => {
+    const item = doc.data();
+
+    const card = `
+      <article class="item-card">
+        <div class="item-image">
+          <img src="${item.image_url}" alt="Clothing item" />
+        </div>
+        <div class="item-meta">
+          <div class="item-category">${item.category}</div>
+          <div class="item-color">Color: ${item.color}</div>
+          <div class="item-tags">Tags: ${item.tags}</div>
+        </div>
+<button class="secondary-button" type="button" onclick="markWorn('${doc.id}')">
+  Mark as Worn
+</button>
+      </article>
+    `;
+
+    grid.innerHTML += card;
+  });
+}
+
+// Load items when page opens
+loadClothes();
+import { doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+window.markWorn = async function (id) {
+  const itemRef = doc(db, "clothes", id);
+
+  await updateDoc(itemRef, {
+    times_worn: increment(1)
+  });
+
+  alert("Nice — usage recorded!");
+  loadClothes(); // refresh UI
+};
+import { query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+async function loadMostWorn() {
+  const q = query(collection(db, "clothes"), orderBy("times_worn", "desc"), limit(3));
+  const querySnapshot = await getDocs(q);
+
+  const grid = document.getElementById("mostWornGrid");
+  grid.innerHTML = "";
+
+  querySnapshot.forEach((doc) => {
+    const item = doc.data();
+
+    grid.innerHTML += `
+      <article class="item-card">
+        <div class="item-image">
+          <img src="${item.image_url}" />
+        </div>
+        <div class="item-meta">
+          <div class="item-category">${item.category}</div>
+          <div>Worn: ${item.times_worn} times</div>
+        </div>
+      </article>
+    `;
+  });
+}
+
+
+</script>
+
+  <script>
+    const cloudName = "ddcxzmusc";   // from dashboard
+    const uploadPreset = "wardrobe_upload";
+    
+    async function uploadImage(file) {
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+    
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData
+      });
+    
+      const data = await response.json();
+      return data.secure_url;
+    }
+    </script>
+    
+</body>
+</html>
+

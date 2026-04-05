@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Insights</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card">
+          <h1 class="section-heading" style="font-size:1.4rem;">Insights</h1>
+          <p class="wardrobe-subtitle">
+            A simple overview of your wardrobe usage. (More charts can be added later.)
+          </p>
+        </section>
+
+        <section>
+          <div class="wardrobe-section-header">
+            <div>
+              <h2 class="section-heading">🔥 Most Worn</h2>
+              <p class="wardrobe-subtitle">Top 3 items by times worn.</p>
+            </div>
+          </div>
+          <div class="wardrobe-grid" id="mostWornGrid"></div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">Planned Features</h2>
+          <ul class="list">
+            <li>Category breakdown (shirts vs pants vs shoes)</li>
+            <li>Tag analytics (casual / office / gym)</li>
+            <li>Wear history calendar</li>
+            <li>Weekly / monthly usage summary</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    import { loadMostWorn } from "./insights.js";
+    await requireAuth();
+    setupLogoutButton();
+    loadMostWorn();
+  </script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Complete My Outfit</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card hero">
+          <div>
+            <h1 class="section-heading" style="font-size:1.4rem; margin-bottom:0.5rem;">Complete My Outfit</h1>
+            <p class="wardrobe-subtitle">
+              Tell AI one piece you’re definitely wearing (like “black t-shirt” or “white sneakers”) and it will suggest
+              bottoms, shoes, and layers from your wardrobe.
+            </p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">Lock one item, let AI fill the rest</h2>
+          <p class="wardrobe-subtitle">
+            Use clear language like “black oversized hoodie”, “blue ripped jeans”, or “white running shoes”.
+          </p>
+          <div style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+            <div class="selected-preview" id="selectedPreview" style="display:none;">
+              <img id="selectedImage" class="preview-thumb" src="" alt="Selected Item"
+                style="width:64px; height:64px; object-fit:cover; border-radius:10px;">
+              <div style="flex:1;">
+                <div
+                  style="font-size:0.85rem; color:#64748b; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">
+                  Selected Item</div>
+                <div id="selectedDetails" style="font-weight:600; font-size:1.05rem; color:#0f172a;"></div>
+              </div>
+              <div class="remove-selection" id="clearSelection">Remove</div>
+            </div>
+
+            <input type="text" id="baseItemInput" placeholder="e.g. black t-shirt" style="min-width:220px; flex:1;" />
+            <button id="openWardrobeBtn" class="secondary-button" type="button" style="padding: 0.7rem 1rem;">
+              Select from Wardrobe
+            </button>
+            <button id="pairBtn" class="primary-button" type="button">Complete My Look</button>
+          </div>
+          <div id="pairResult" style="margin-top:0.9rem; font-size:0.95rem;"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for Item Selection -->
+  <div class="modal-overlay" id="wardrobeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="section-heading" style="margin:0; font-size:1.25rem;">Select from Wardrobe</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="item-select-grid" id="modalGrid"
+          style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+          <p style="grid-column: 1/-1; text-align: center; color: #666;">Loading wardrobe...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    await requireAuth();
+    setupLogoutButton();
+  </script>
+  <script type="module" src="ai-base.js"></script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

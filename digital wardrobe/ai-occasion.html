@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Outfit by Occasion</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card hero">
+          <div>
+            <h1 class="section-heading" style="font-size:1.4rem; margin-bottom:0.5rem;">Outfit by Occasion</h1>
+            <p class="wardrobe-subtitle">
+              Pick an occasion and AI will build a complete look from your saved wardrobe that matches the vibe.
+            </p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">Tell the stylist where you’re going</h2>
+          <p class="wardrobe-subtitle">
+            The more outfits you save (with tags like casual, office, party, gym, winter), the smarter the suggestions
+            get.
+          </p>
+          <div style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+            <select id="occasionSelect" style="max-width:220px;">
+              <option value="">Select occasion</option>
+              <option value="casual">Casual / Everyday</option>
+              <option value="office">Office / Formal</option>
+              <option value="party">Party / Night out</option>
+              <option value="gym">Gym / Sports</option>
+              <option value="date">Date / Special</option>
+            </select>
+            <input type="text" id="occasionNotes" placeholder="Optional notes (e.g. indoor, summer, client meeting)"
+              style="flex:1; min-width:180px;" />
+            <button id="occasionBtn" class="primary-button" type="button">Suggest Outfit</button>
+          </div>
+          <div id="occasionResult" style="margin-top:0.9rem; font-size:0.95rem;"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    await requireAuth();
+    setupLogoutButton();
+  </script>
+  <script type="module" src="ai-occasion.js"></script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

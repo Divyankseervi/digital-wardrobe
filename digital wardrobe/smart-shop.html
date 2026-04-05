@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Digital Wardrobe - Smart Shopping Optimizer</title>
+    <meta name="description"
+        content="AI-powered wardrobe optimizer that recommends the best item to buy next for maximum outfit combinations." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* ── Smart Shop Page Styles ── */
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(124, 58, 237, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card__label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card__value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .stat-card__hint {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        /* Status text */
+        .status-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0.5rem 0;
+            min-height: 1.5rem;
+        }
+
+        /* Result Section */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: cardReveal 0.6s ease;
+        }
+
+        /* Recommendation Grid */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        /* Recommendation Card */
+        .rec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: cardReveal 0.6s ease backwards;
+        }
+
+        .rec-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .rec-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.4),
+                0 0 50px rgba(124, 58, 237, 0.12);
+        }
+
+        .rec-card:hover::before {
+            opacity: 1;
+        }
+
+        .rec-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .rec-card:nth-child(2) {
+            animation-delay: 0.25s;
+        }
+
+        .rec-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* First card (top pick) special glow */
+        .rec-card:nth-child(1) {
+            border-color: rgba(124, 58, 237, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(124, 58, 237, 0.08);
+        }
+
+        .rec-card:nth-child(1)::before {
+            opacity: 0.7;
+        }
+
+        .rec-card__rank {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .rec-card__name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.6rem;
+            line-height: 1.3;
+        }
+
+        .rec-card__meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .rec-card__category {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rec-card__color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        /* Impact Score */
+        .rec-card__impact {
+            background: rgba(124, 58, 237, 0.06);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .impact-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .impact-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .impact-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .impact-bar__fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #22d3ee, #7c3aed);
+            border-radius: 3px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: barGrow 1.2s ease forwards;
+        }
+
+        @keyframes barGrow {
+            from {
+                width: 0 !important;
+            }
+        }
+
+        .impact-detail {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* Reason */
+        .rec-card__reason {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            padding-left: 0.75rem;
+            border-left: 2px solid rgba(124, 58, 237, 0.3);
+        }
+
+        /* Shopping Links */
+        .rec-card__links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .shop-link {
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .shop-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .shop-link--amazon:hover {
+            background: rgba(255, 153, 0, 0.15);
+            border-color: rgba(255, 153, 0, 0.4);
+            color: #ff9900;
+        }
+
+        .shop-link--flipkart:hover {
+            background: rgba(47, 126, 216, 0.15);
+            border-color: rgba(47, 126, 216, 0.4);
+            color: #2f7ed8;
+        }
+
+        .shop-link--myntra:hover {
+            background: rgba(255, 63, 108, 0.15);
+            border-color: rgba(255, 63, 108, 0.4);
+            color: #ff3f6c;
+        }
+
+        .shop-link--ajio:hover {
+            background: rgba(65, 105, 225, 0.15);
+            border-color: rgba(65, 105, 225, 0.4);
+            color: #4169e1;
+        }
+
+        /* Formality badges (reuse from shopping.html) */
+        .formality-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .formality-badge--formal {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .formality-badge--semi-formal {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .formality-badge--casual {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Skeleton */
+        .rec-card--skeleton {
+            min-height: 280px;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 7px;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0.02) 25%,
+                    rgba(255, 255, 255, 0.08) 50%,
+                    rgba(255, 255, 255, 0.02) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-line--short {
+            width: 35%;
+        }
+
+        .skeleton-line--medium {
+            width: 65%;
+        }
+
+        .skeleton-line--long {
+            width: 90%;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .rec-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stats-row {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .rec-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="nav-left">👕 Digital Wardrobe</div>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="wardrobe.html">Wardrobe</a>
+                <a href="add.html">Add Item</a>
+                <a href="insights.html">Insights</a>
+                <a href="suggest.html">Outfit AI</a>
+                <a href="shopping.html">Shopping</a>
+                <a href="smart-shop.html">Smart Shop</a>
+                <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+            </div>
+        </nav>
+
+        <main>
+            <div class="main-inner">
+
+                <!-- Hero Section -->
+                <section class="card hero">
+                    <div>
+                        <h1 class="section-heading" style="font-size:1.6rem; margin-bottom:0.5rem;
+              background: var(--gradient-primary); -webkit-background-clip:text;
+              -webkit-text-fill-color:transparent; background-clip:text;">
+                            🛍️ Smart Shopping Optimizer
+                        </h1>
+                        <p class="wardrobe-subtitle" style="line-height:1.7;">
+                            Our AI simulates adding new items to your wardrobe and finds the
+                            <strong style="color: var(--neon-purple);">one purchase that creates the most new outfit
+                                combinations</strong>.
+                            Stop buying randomly — shop strategically.
+                        </p>
+                        <div class="cta-row" style="margin-top:1rem;">
+                            <button class="primary-button" id="analyzeBtn" style="text-decoration:none;">
+                                🧠 Analyze My Wardrobe
+                            </button>
+                            <a class="ghost-button" href="wardrobe.html">View Wardrobe</a>
+                        </div>
+                    </div>
+                    <div class="hero-art" aria-hidden="true">
+                        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=900&h=700&fit=crop"
+                            alt="" />
+                    </div>
+                </section>
+
+                <!-- Results Section -->
+                <section class="result-section" id="resultSection">
+
+                    <!-- Stats Row -->
+                    <div class="card" style="margin-bottom:1.25rem;">
+                        <h2 class="section-heading">📊 Wardrobe Analysis</h2>
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <div class="stat-card__label">Current Outfit Combos</div>
+                                <div class="stat-card__value" id="currentCount">—</div>
+                                <div class="stat-card__hint">With your existing wardrobe</div>
+                            </div>
+                        </div>
+                        <div class="status-text" id="statusText"></div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="card" style="margin-bottom:1.25rem;">
+                        <h2 class="section-heading">🏆 Top Items to Buy</h2>
+                        <p class="wardrobe-subtitle">Ranked by how many new outfit combinations each item unlocks.</p>
+                    </div>
+                    <div class="rec-grid" id="recGrid"></div>
+                </section>
+
+                <!-- How It Works -->
+                <section class="card">
+                    <h2 class="section-heading">⚙️ How It Works</h2>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-title">📦 Wardrobe Scan</div>
+                            <div class="feature-text">
+                                AI reads every item in your wardrobe — type, color, formality, and tags.
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">🧪 Combo Simulation</div>
+                            <div class="feature-text">
+                                It generates candidate items and simulates adding each one, counting valid outfit
+                                combos.
+                            </div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-title">🎯 Impact Score</div>
+                            <div class="feature-text">
+                                Each candidate gets a score = new combos − current combos. The highest score wins.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="particles.js"></script>
+    <script type="module">
+        import { requireAuth, setupLogoutButton } from "./auth.js";
+        await requireAuth();
+        setupLogoutButton();
+    </script>
+    <script type="module" src="smart-shop.js"></script>
+</body>
+
+</html>

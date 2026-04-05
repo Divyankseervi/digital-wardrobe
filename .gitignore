@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.production
+.env.*
+!.env.example
+env.*
+!env.example
+
+# Frontend config with secrets
+digital wardrobe/config.js
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp files
+temp_*.jpg
+temp_*.png
+*.tmp
+
+# Logs
+*.log
+npm-debug.log*
+
+# API test data (may contain responses with keys)
+digital wardrobe/api_check.json
+digital wardrobe/api_check2.json
+
+# Python virtual env
+*.egg-info/
+dist/
+build/
+coverage/
+.cache/
+.parcel-cache/
+.next/
+out/
+.turbo/
+
+# Test images
+cloth detection/test_image.jpg

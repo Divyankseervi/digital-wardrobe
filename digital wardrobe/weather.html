@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Weather Stylist</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card hero">
+          <div>
+            <h1 class="section-heading" style="font-size:1.4rem; margin-bottom:0.5rem;">Weather Stylist</h1>
+            <p class="wardrobe-subtitle">
+              This tool checks the weather for your city and asks AI to build a complete, weather-safe outfit from your
+              wardrobe.
+            </p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">🌦 Get a Weather-Based Outfit</h2>
+          <p class="wardrobe-subtitle">
+            Type your city name and I’ll pick one top, one pant, and one pair of shoes based on temperature, conditions,
+            and color harmony.
+          </p>
+          <div style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center;">
+            <input type="text" id="cityInput" placeholder="Enter city (e.g. Delhi)" style="max-width:220px;" />
+            <button id="weatherBtn" class="primary-button" type="button">Generate Outfit</button>
+          </div>
+          <div id="weatherResult" style="margin-top:0.9rem; font-size:0.95rem;"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    await requireAuth();
+    setupLogoutButton();
+  </script>
+  <script type="module" src="weather.js"></script>
+  <script src="particles.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Smart Shopping Assistant</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Wardrobe Picker Grid ── */
+    .wardrobe-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .wardrobe-picker-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .wardrobe-picker-grid::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .wardrobe-picker-grid::-webkit-scrollbar-thumb {
+      background: rgba(124, 58, 237, 0.3);
+      border-radius: 3px;
+    }
+
+    .wardrobe-pick-item {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid var(--glass-border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      aspect-ratio: 3 / 4;
+    }
+
+    .wardrobe-pick-item:hover {
+      border-color: rgba(124, 58, 237, 0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .wardrobe-pick-item.selected {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.35), 0 12px 30px rgba(0, 0, 0, 0.3);
+      transform: translateY(-4px) scale(1.03);
+    }
+
+    .wardrobe-pick-item.selected::after {
+      content: "✓";
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      z-index: 2;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+    }
+
+    .wardrobe-pick-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+
+    .wardrobe-pick-item:hover img {
+      transform: scale(1.08);
+    }
+
+    .wardrobe-pick-item__label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.5rem 0.6rem;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      font-size: 0.72rem;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    /* Selected Item Details */
+    .selected-details {
+      display: none;
+      margin-top: 1.25rem;
+      padding: 1rem 1.25rem;
+      background: rgba(124, 58, 237, 0.06);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 14px;
+      animation: cardReveal 0.4s ease;
+    }
+
+    .selected-details.show {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .selected-details__img {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .selected-details__info {
+      flex: 1;
+    }
+
+    .selected-details__name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+      text-transform: capitalize;
+      margin-bottom: 0.25rem;
+    }
+
+    .selected-details__meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .analyze-btn {
+      margin-top: 1.25rem;
+      padding: 0.85rem 2.5rem;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .analyze-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Empty State */
+    .empty-wardrobe {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .empty-wardrobe__icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .empty-wardrobe__text {
+      font-size: 0.95rem;
+    }
+
+    .empty-wardrobe__link {
+      color: var(--neon-purple);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* ── Metadata Panel ── */
+    .metadata-panel {
+      display: none;
+      animation: cardReveal 0.6s ease;
+    }
+
+    .metadata-panel.show {
+      display: block;
+    }
+
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .metadata-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .metadata-item:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .metadata-item__label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .metadata-item__value {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: capitalize;
+    }
+
+    .metadata-item__icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .color-swatch {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      margin-right: 0.5rem;
+      vertical-align: middle;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .formality-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .formality-badge--formal {
+      background: rgba(124, 58, 237, 0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 58, 237, 0.3);
+    }
+
+    .formality-badge--semi-formal {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .formality-badge--casual {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* ── Shopping Cards Grid ── */
+    .shopping-section {
+      display: none;
+    }
+
+    .shopping-section.show {
+      display: block;
+      animation: cardReveal 0.7s ease;
+    }
+
+    .shopping-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      animation: cardReveal 0.6s ease backwards;
+    }
+
+    .product-card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .product-card:nth-child(2) {
+      animation-delay: 0.25s;
+    }
+
+    .product-card:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    .product-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: rgba(124, 58, 237, 0.4);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(124, 58, 237, 0.12);
+    }
+
+    .product-card:hover::before {
+      opacity: 1;
+    }
+
+    .product-card__image {
+      width: 100%;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-card__image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-card:hover .product-card__image img {
+      transform: scale(1.1);
+    }
+
+    .product-card__price-tag {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(10, 10, 26, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 0.4rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      font-weight: 700;
+      font-size: 1rem;
+      color: #10b981;
+    }
+
+    .product-card__body {
+      padding: 1.25rem;
+    }
+
+    .product-card__brand {
+      font-size: 0.72rem;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .product-card__name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .product-card__category {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .product-card__cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      border: none;
+      border-radius: 12px;
+      background: var(--gradient-primary);
+      background-size: 200% auto;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card__cta::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .product-card__cta:hover {
+      background-position: right center;
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .product-card__cta:hover::before {
+      left: 100%;
+    }
+
+    /* Skeleton */
+    .skeleton-card {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .skeleton-card__image {
+      width: 100%;
+      aspect-ratio: 4/5;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.02) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+    }
+
+    .skeleton-card__body {
+      padding: 1.25rem;
+    }
+
+    .skeleton-card__line {
+      height: 12px;
+      border-radius: 6px;
+      margin-bottom: 0.6rem;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+    }
+
+    .skeleton-card__line--short {
+      width: 40%;
+    }
+
+    .skeleton-card__line--medium {
+      width: 70%;
+    }
+
+    .skeleton-card__line--full {
+      width: 100%;
+      height: 40px;
+      border-radius: 12px;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .shopping-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .metadata-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shopping-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wardrobe-picker-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+
+        <!-- Hero Section -->
+        <section class="card hero">
+          <div>
+            <h1 class="section-heading" style="font-size:1.6rem; margin-bottom:0.5rem;
+              background: var(--gradient-primary); -webkit-background-clip:text;
+              -webkit-text-fill-color:transparent; background-clip:text;">
+              🛍️ Smart Shopping Assistant
+            </h1>
+            <p class="wardrobe-subtitle" style="line-height:1.7;">
+              Select an item from your wardrobe and our AI will recommend
+              <strong style="color: var(--neon-purple);">3 perfect complementary items</strong>
+              to complete your outfit — with links to shop instantly.
+            </p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <!-- Wardrobe Picker Card -->
+        <section class="card" id="pickerCard">
+          <h2 class="section-heading">👗 Select from Your Wardrobe</h2>
+          <p class="wardrobe-subtitle">Pick an item to get shopping recommendations for.</p>
+
+          <div id="wardrobePickerGrid" class="wardrobe-picker-grid">
+            <div style="text-align:center; grid-column:1/-1; padding:2rem; color:var(--text-muted);">
+              Loading your wardrobe...
+            </div>
+          </div>
+
+          <!-- Selected item preview -->
+          <div class="selected-details" id="selectedDetails">
+            <img class="selected-details__img" id="selectedImg" alt="selected" />
+            <div class="selected-details__info">
+              <div class="selected-details__name" id="selectedName"></div>
+              <div class="selected-details__meta" id="selectedMeta"></div>
+            </div>
+          </div>
+
+          <button class="primary-button analyze-btn" id="analyzeBtn" disabled>
+            ✨ Get Shopping Recommendations
+          </button>
+        </section>
+
+        <!-- Wardrobe Metadata -->
+        <section class="card metadata-panel" id="metadataPanel">
+          <h2 class="section-heading">🧠 Item Details</h2>
+          <p class="wardrobe-subtitle">Details of the selected wardrobe item.</p>
+          <div class="metadata-grid">
+            <div class="metadata-item">
+              <div class="metadata-item__icon">👗</div>
+              <div class="metadata-item__label">Category</div>
+              <div class="metadata-item__value" id="metaCategory">—</div>
+            </div>
+            <div class="metadata-item">
+              <div class="metadata-item__icon">🎨</div>
+              <div class="metadata-item__label">Color</div>
+              <div class="metadata-item__value" id="metaColor">—</div>
+            </div>
+            <div class="metadata-item">
+              <div class="metadata-item__icon">🏷️</div>
+              <div class="metadata-item__label">Formality</div>
+              <div class="metadata-item__value" id="metaFormality">—</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Shopping Recommendations -->
+        <section class="shopping-section" id="shoppingSection">
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <h2 class="section-heading">🛒 Complete Your Outfit</h2>
+            <p class="wardrobe-subtitle">
+              Based on your <span id="summaryItem" style="color: var(--neon-purple); font-weight:600;"></span>,
+              here are 3 items to complete the look.
+            </p>
+          </div>
+          <div class="shopping-grid" id="shoppingGrid"></div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="particles.js"></script>
+  <script type="module">
+    import { supabase } from "./supabase.js";
+    import { requireAuth, setupLogoutButton, getCurrentUser } from "./auth.js";
+
+    const user = await requireAuth();
+    setupLogoutButton();
+
+    const wardrobeGrid = document.getElementById('wardrobePickerGrid');
+    const selectedDetails = document.getElementById('selectedDetails');
+    const selectedImg = document.getElementById('selectedImg');
+    const selectedName = document.getElementById('selectedName');
+    const selectedMeta = document.getElementById('selectedMeta');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const metadataPanel = document.getElementById('metadataPanel');
+    const shoppingSection = document.getElementById('shoppingSection');
+    const shoppingGrid = document.getElementById('shoppingGrid');
+
+    let selectedItem = null;
+
+    // ── 1. Fetch wardrobe items ──
+    async function loadWardrobe() {
+      const { data, error } = await supabase
+        .from('clothes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        wardrobeGrid.innerHTML = `<div class="empty-wardrobe" style="grid-column:1/-1">
+          <div class="empty-wardrobe__icon">⚠️</div>
+          <div class="empty-wardrobe__text">Failed to load wardrobe: ${error.message}</div>
+        </div>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        wardrobeGrid.innerHTML = `<div class="empty-wardrobe" style="grid-column:1/-1">
+          <div class="empty-wardrobe__icon">👕</div>
+          <div class="empty-wardrobe__text">Your wardrobe is empty.<br><a href="add.html" class="empty-wardrobe__link">Add your first item →</a></div>
+        </div>`;
+        return;
+      }
+
+      wardrobeGrid.innerHTML = data.map((item, i) => `
+        <div class="wardrobe-pick-item" data-index="${i}"
+             data-category="${item.category || 'other'}"
+             data-color="${item.color || 'Unknown'}"
+             data-tags="${item.tags || 'Casual'}"
+             data-image="${item.image_url || ''}">
+          <img src="${item.image_url}" alt="${item.category}" loading="lazy" />
+          <div class="wardrobe-pick-item__label">${item.category || 'Item'} · ${item.color || ''}</div>
+        </div>
+      `).join('');
+
+      // Bind click events
+      wardrobeGrid.querySelectorAll('.wardrobe-pick-item').forEach(el => {
+        el.addEventListener('click', () => selectItem(el));
+      });
+    }
+
+    // ── 2. Select an item ──
+    function selectItem(el) {
+      // Deselect previous
+      wardrobeGrid.querySelectorAll('.wardrobe-pick-item').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+
+      const category = el.dataset.category;
+      const color = el.dataset.color;
+      const tags = el.dataset.tags;
+      const imageUrl = el.dataset.image;
+
+      selectedItem = { category, color, formality: tags || 'Casual', imageUrl };
+
+      // Show selected preview
+      selectedImg.src = imageUrl;
+      selectedName.textContent = category;
+      selectedMeta.textContent = `${color} · ${tags || 'Casual'}`;
+      selectedDetails.classList.add('show');
+
+      analyzeBtn.disabled = false;
+
+      // Hide old results
+      metadataPanel.classList.remove('show');
+      shoppingSection.classList.remove('show');
+    }
+
+    // ── 3. Get Recommendations ──
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedItem) return;
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = '🔍 Fetching recommendations...';
+
+      shoppingSection.classList.add('show');
+      shoppingGrid.innerHTML = renderSkeletons(3);
+      metadataPanel.classList.remove('show');
+
+      try {
+        // Determine formality from tags
+        let formality = selectedItem.formality || 'Casual';
+        if (formality.toLowerCase().includes('formal') && !formality.toLowerCase().includes('semi')) formality = 'Formal';
+        else if (formality.toLowerCase().includes('semi')) formality = 'Semi-Formal';
+        else formality = 'Casual';
+
+        const response = await fetch('http://localhost:8000/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            category: selectedItem.category,
+            color: selectedItem.color,
+            formality: formality
+          })
+        });
+
+        if (!response.ok) throw new Error('Recommendations failed: ' + response.status);
+        const data = await response.json();
+
+        // Show metadata
+        displayMetadata({
+          category: selectedItem.category,
+          color: selectedItem.color,
+          formality: formality
+        });
+
+        // Show shopping cards
+        displayShoppingCards(data.shopping_recommendations, data);
+
+      } catch (err) {
+        console.error(err);
+        shoppingGrid.innerHTML = `
+          <div class="card" style="grid-column: 1/-1; text-align:center; padding:2rem;">
+            <p style="color: #ef4444; font-size:1rem;">⚠️ ${err.message}</p>
+            <p style="color: var(--text-muted); margin-top:0.5rem; font-size:0.85rem;">
+              Make sure the Python server is running at localhost:8000
+            </p>
+          </div>`;
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = '✨ Get Shopping Recommendations';
+      }
+    });
+
+    // ── Display Metadata ──
+    function displayMetadata(data) {
+      document.getElementById('metaCategory').textContent = data.category || '—';
+      const colorEl = document.getElementById('metaColor');
+      const colorName = data.color || '—';
+      colorEl.innerHTML = `<span class="color-swatch" style="background:${colorName.toLowerCase()};"></span> ${colorName}`;
+
+      const formalityEl = document.getElementById('metaFormality');
+      const f = (data.formality || '').toLowerCase();
+      let badgeClass = 'formality-badge--casual';
+      if (f === 'formal') badgeClass = 'formality-badge--formal';
+      else if (f === 'semi-formal') badgeClass = 'formality-badge--semi-formal';
+      formalityEl.innerHTML = `<span class="formality-badge ${badgeClass}">${data.formality}</span>`;
+
+      metadataPanel.classList.add('show');
+      document.getElementById('summaryItem').textContent = `${data.formality} ${data.color} ${data.category}`;
+    }
+
+    // ── Display Shopping Cards ──
+    function displayShoppingCards(items, metadata) {
+      if (!items || items.length === 0) {
+        shoppingGrid.innerHTML = `<div class="card" style="grid-column:1/-1; text-align:center; padding:2rem;">
+          <p style="color: var(--text-secondary);">No recommendations available.</p>
+        </div>`;
+        return;
+      }
+
+      shoppingGrid.innerHTML = items.map((item, i) => `
+        <div class="product-card">
+          <div class="product-card__image">
+            <img src="${item.image}" alt="${item.name}" loading="lazy" />
+            <div class="product-card__price-tag">₹${item.price.toLocaleString()}</div>
+          </div>
+          <div class="product-card__body">
+            <div class="product-card__brand">${item.brand}</div>
+            <div class="product-card__name">${item.name}</div>
+            <div class="product-card__category">
+              ${item.category} ·
+              <span class="formality-badge formality-badge--${item.formality.toLowerCase().replace(' ', '-')}" style="font-size:0.7rem; padding:0.15rem 0.5rem;">
+                ${item.formality}
+              </span>
+            </div>
+            <a href="${item.buy_url}" target="_blank" rel="noopener" class="product-card__cta">
+              🛒 Shop on Myntra
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ── Skeleton Loader ──
+    function renderSkeletons(count) {
+      let html = '';
+      for (let i = 0; i < count; i++) {
+        html += `<div class="skeleton-card">
+          <div class="skeleton-card__image"></div>
+          <div class="skeleton-card__body">
+            <div class="skeleton-card__line skeleton-card__line--short"></div>
+            <div class="skeleton-card__line skeleton-card__line--medium"></div>
+            <div class="skeleton-card__line skeleton-card__line--short"></div>
+            <div class="skeleton-card__line skeleton-card__line--full"></div>
+          </div>
+        </div>`;
+      }
+      return html;
+    }
+
+    // ── Init ──
+    loadWardrobe();
+  </script>
+</body>
+
+</html>

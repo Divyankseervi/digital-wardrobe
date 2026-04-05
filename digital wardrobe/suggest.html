@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Wardrobe - Outfit AI</title>
+
+  <!-- Google Font: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">👕 Digital Wardrobe</div>
+      <div class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="wardrobe.html">Wardrobe</a>
+        <a href="add.html">Add Item</a>
+        <a href="insights.html">Insights</a>
+        <a href="suggest.html">Outfit AI</a>
+        <a href="shopping.html">Shopping</a>
+        <a href="smart-shop.html">Smart Shop</a>
+        <a href="#" id="logoutBtn" style="color:#ef4444;">Logout</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="main-inner">
+        <section class="card hero">
+          <div>
+            <h1 class="section-heading" style="font-size:1.4rem; margin-bottom:0.5rem;">Outfit AI Hub</h1>
+            <p class="wardrobe-subtitle">
+              Choose how you want AI to help: by occasion, completing an outfit around one item, or matching today’s
+              weather.
+            </p>
+
+            <div class="cta-row" style="margin-top:1rem;">
+              <a class="primary-button" href="wardrobe.html" style="text-decoration:none;">View Wardrobe</a>
+              <a class="ghost-button" href="add.html">Add More Items</a>
+            </div>
+          </div>
+
+          <div class="hero-art" aria-hidden="true">
+            <img src="https://images.unsplash.com/photo-1520975682031-ae9f4996a9cb?w=900&h=700&fit=crop" alt="" />
+          </div>
+        </section>
+
+        <section class="card">
+          <h2 class="section-heading">Pick an AI stylist tool</h2>
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-title">🎯 Outfit by Occasion</div>
+              <div class="feature-text">
+                Tell AI if it’s office, casual, party, gym, or a date — it will build a full outfit from your wardrobe.
+              </div>
+              <a href="ai-occasion.html" class="ghost-button" style="margin-top:0.5rem;">Open Occasion Stylist</a>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-title">🧩 Complete My Outfit</div>
+              <div class="feature-text">
+                Lock one piece (like a black t-shirt or white sneakers) and let AI recommend the rest of the look.
+              </div>
+              <a href="ai-base.html" class="ghost-button" style="margin-top:0.5rem;">Open Outfit Completer</a>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-title">🌦 Weather Stylist</div>
+              <div class="feature-text">
+                Use weather and your saved clothes to pick something comfortable and practical for today.
+              </div>
+              <a href="weather.html" class="ghost-button" style="margin-top:0.5rem;">Open Weather Stylist</a>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-title">🛍️ Smart Shopping</div>
+              <div class="feature-text">
+                AI simulates adding items to your wardrobe and recommends the one that creates the most new outfits.
+              </div>
+              <a href="smart-shop.html" class="ghost-button" style="margin-top:0.5rem;">Open Smart Shop</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <!-- Modal for Item Selection -->
+  <div class="modal-overlay" id="wardrobeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="section-heading" style="margin:0;">Select an Item</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="item-select-grid" id="modalGrid">
+        <!-- Items will be injected here -->
+        <p style="grid-column: 1/-1; text-align: center; color: #666;">Loading wardrobe...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { requireAuth, setupLogoutButton } from "./auth.js";
+    await requireAuth();
+    setupLogoutButton();
+  </script>
+  <script type="module" src="suggest.js"></script>
+  <script src="particles.js"></script>
+</body>
+
+</html>
