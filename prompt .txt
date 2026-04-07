@@ -1,3 +1,0 @@
-Wardrobe Stats Dashboard — Total items, category breakdown bar chart, most/least worn, "forgotten items" (never worn in 30+ days). Uses data you already have.
-Outfit of the Day (OOTD) — Auto-generate one outfit on the dashboard each morning based on the weather + what you haven't worn recently. One API call on page load.
-Delete / Edit Items — Your wardrobe page has "Mark as Worn" but no way to delete or edit items. Basic but essential.  and in the wardrobe, every wardrobe should have last worn stat also
