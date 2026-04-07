@@ -1,8 +1,18 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env from project root (one level up from 'digital wardrobe/')
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+// Also try local .env in the current directory as a fallback
 dotenv.config();
+// Allow local non-dot env for environments that block dotfiles
+dotenv.config({ path: "env.local", override: true });
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -282,6 +292,91 @@ Respond ONLY with a valid JSON object:
   } catch (err) {
     console.error("Error in weather-outfit:", err);
     return res.status(500).json({ error: "Server error processing weather outfit request" });
+  }
+});
+
+// 🌟 Outfit of the Day (OOTD) - Dashboard endpoint
+app.post("/api/ootd", async (req, res) => {
+  try {
+    const { city, wardrobe } = req.body;
+    let targetCity = city || "New York";
+
+    if (!wardrobe || wardrobe.length === 0) {
+      return res.json({
+        outfit: [],
+        message: "Your wardrobe is empty! Add items first.",
+      });
+    }
+
+    // 1. Filter out recently worn items (e.g. worn in the last 3 days)
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const availableWardrobe = wardrobe.filter(item => {
+      // Allow if never worn
+      if (!item.last_worn_date) return true;
+      // Exclude if worn within the last 3 days
+      return new Date(item.last_worn_date) < threeDaysAgo;
+    });
+
+    const itemsToUse = availableWardrobe.length > 3 ? availableWardrobe : wardrobe;
+
+    // 2. Fetch weather
+    let temp = 20, condition = "Clear";
+    try {
+      const weatherRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(targetCity)}&appid=${WEATHER_API_KEY}&units=metric`
+      );
+      if (weatherRes.ok) {
+        const weatherData = await weatherRes.json();
+        temp = weatherData.main.temp;
+        condition = weatherData.weather[0].main;
+      }
+    } catch(e) {
+      console.error("OOTD Weather error:", e);
+    }
+
+    // 3. Format context
+    const wardrobeContext = itemsToUse.map(i => 
+      `{"id": "${i.id}", "category": "${i.category}", "color": "${i.color}", "tags": "${i.tags}"}`
+    ).join(",\n");
+
+    const prompt = `
+You are an elite fashion stylist generating the "Outfit of the Day". 
+The current weather in ${targetCity} is ${temp}°C and ${condition}.
+Here is the user's available wardrobe (excluding recently worn items): [${wardrobeContext}]
+
+Rules:
+1. Weather-Appropriate: Pick items suitable for ${temp}°C and ${condition}.
+2. Ensure color harmony and style match.
+3. Select exactly ONE top, ONE bottom, and ONE pair of shoes (Jacket optional).
+
+Respond ONLY with a valid JSON object:
+{
+  "reasoning": "A catchy phrase explaining why this fits the weather and style.",
+  "suggested_ids": ["id1", "id2", "id3"]
+}
+`;
+
+    let aiText = await callGemini(prompt);
+    aiText = aiText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    let result = {};
+    try {
+      result = JSON.parse(aiText);
+    } catch (e) {
+      return res.json({ outfit: [], message: "AI could not generate OOTD." });
+    }
+
+    const outfit = itemsToUse.filter((item) => result.suggested_ids.map(String).includes(String(item.id)));
+    
+    return res.json({
+      outfit: outfit,
+      reasoning: result.reasoning,
+      message: `Your Outfit of the Day for ${temp}°C in ${targetCity}`
+    });
+  } catch (err) {
+    console.error("Error in ootd:", err);
+    return res.status(500).json({ error: "Server error processing OOTD request" });
   }
 });
 

@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -22,7 +24,7 @@
         <a href="index.html">Dashboard</a>
         <a href="wardrobe.html">Wardrobe</a>
         <a href="add.html">Add Item</a>
-        <a href="insights.html">Insights</a>
+        <a href="insights.html" class="active">Insights</a>
         <a href="suggest.html">Outfit AI</a>
         <a href="shopping.html">Shopping</a>
         <a href="smart-shop.html">Smart Shop</a>
@@ -32,11 +34,21 @@
 
     <main>
       <div class="main-inner">
-        <section class="card">
-          <h1 class="section-heading" style="font-size:1.4rem;">Insights</h1>
+        <section class="card" style="text-align: center;">
+          <h1 class="section-heading" style="font-size:1.8rem;">Wardrobe Insights</h1>
           <p class="wardrobe-subtitle">
-            A simple overview of your wardrobe usage. (More charts can be added later.)
+            Understand your style habits and wardrobe utilization.
           </p>
+          <div style="margin-top: 1rem;">
+            <p style="font-size: 1.2rem; font-weight: 500;">Total Items: <span id="totalItemsCount" style="color: var(--primary);">0</span></p>
+          </div>
+        </section>
+
+        <section class="card" style="display: flex; flex-direction: column; align-items: center;">
+          <h2 class="section-heading">Category Breakdown</h2>
+          <div style="width: 100%; max-width: 500px; margin-top: 1rem;">
+            <canvas id="categoryChart"></canvas>
+          </div>
         </section>
 
         <section>
@@ -48,15 +60,15 @@
           </div>
           <div class="wardrobe-grid" id="mostWornGrid"></div>
         </section>
-
-        <section class="card">
-          <h2 class="section-heading">Planned Features</h2>
-          <ul class="list">
-            <li>Category breakdown (shirts vs pants vs shoes)</li>
-            <li>Tag analytics (casual / office / gym)</li>
-            <li>Wear history calendar</li>
-            <li>Weekly / monthly usage summary</li>
-          </ul>
+        
+        <section>
+          <div class="wardrobe-section-header" style="margin-top: 2rem;">
+            <div>
+              <h2 class="section-heading">❄️ Forgotten Items</h2>
+              <p class="wardrobe-subtitle">Items not worn in 30+ days (or never worn).</p>
+            </div>
+          </div>
+          <div class="wardrobe-grid" id="forgottenItemsGrid"></div>
         </section>
       </div>
     </main>
@@ -64,10 +76,10 @@
 
   <script type="module">
     import { requireAuth, setupLogoutButton } from "./auth.js";
-    import { loadMostWorn } from "./insights.js";
+    import { loadInsights } from "./insights.js";
     await requireAuth();
     setupLogoutButton();
-    loadMostWorn();
+    loadInsights();
   </script>
   <script src="particles.js"></script>
 </body>

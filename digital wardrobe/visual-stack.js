@@ -94,7 +94,16 @@ function renderItemCard(item) {
 }
 
 export function renderOutfitStack(items, containerElement, reasoningText = "") {
-    if (!containerElement || !items || items.length === 0) return;
+    if (!containerElement) return;
+
+    if (!items || items.length === 0) {
+        containerElement.innerHTML = `
+        <div class="outfit-composition">
+          <h3 class="outfit-composition__title">🤔 No Outfit Found</h3>
+          <p class="outfit-composition__reasoning">${reasoningText || "AI couldn't build a complete outfit from your current wardrobe. Try adding more items (tops, bottoms, shoes) to get better results."}</p>
+        </div>`;
+        return;
+    }
 
     // Group items by category
     const headwear = [];

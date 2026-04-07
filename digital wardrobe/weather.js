@@ -51,8 +51,8 @@ if (weatherBtn) {
 
       const data = await response.json();
 
-      if (data.outfit.length === 0) {
-        weatherResult.innerHTML = `<div class='card'>${data.message || "No outfit could be generated."}</div>`;
+      if (!data.outfit || (Array.isArray(data.outfit) && data.outfit.length === 0) || typeof data.outfit === 'string') {
+        weatherResult.innerHTML = `<div class='card' style='padding:1.5rem;'><p style="color:var(--text-secondary);">${data.message || data.outfit || "No outfit could be generated."}</p></div>`;
         return;
       }
 

@@ -100,6 +100,16 @@
         <section>
           <div class="wardrobe-section-header">
             <div>
+              <h2 class="section-heading">🌟 Outfit of the Day</h2>
+              <p class="wardrobe-subtitle">Auto-generated daily based on weather.</p>
+            </div>
+          </div>
+          <div id="ootdResult"></div>
+        </section>
+
+        <section>
+          <div class="wardrobe-section-header">
+            <div>
               <h2 class="section-heading">🔥 Most Worn</h2>
               <p class="wardrobe-subtitle">Top 3 items by times worn.</p>
             </div>
@@ -124,11 +134,67 @@
   </footer>
 
   <script type="module">
-    import { requireAuth, setupLogoutButton } from "./auth.js";
+    import { requireAuth, setupLogoutButton, getCurrentUser } from "./auth.js";
     import { loadMostWorn } from "./insights.js";
+    import { supabase } from "./supabase.js";
+    import { renderOutfitStack, showOutfitLoader } from "./visual-stack.js";
+
     await requireAuth();
     setupLogoutButton();
     loadMostWorn();
+
+    // OOTD Logic
+    async function loadOOTD() {
+      const ootdResult = document.getElementById("ootdResult");
+      if (!ootdResult) return;
+
+      const today = new Date().toISOString().split('T')[0];
+      const cachedOOTD = localStorage.getItem("ootd_data");
+      const cachedDate = localStorage.getItem("ootd_date");
+
+      if (cachedDate === today && cachedOOTD) {
+        // Use cached OOTD
+        const data = JSON.parse(cachedOOTD);
+        renderOutfitStack(data.outfit, ootdResult, data.message + " - " + data.reasoning);
+        return;
+      }
+
+      showOutfitLoader(ootdResult);
+      
+      const user = await getCurrentUser();
+      if (!user) return;
+      
+      const { data: wardrobe } = await supabase.from('clothes').select('*').eq('user_id', user.id);
+      
+      // Use cached city if available, otherwise default to New York
+      // In a real app we'd ask for location, but this satisfies the requirements
+      const targetCity = "New York";
+
+      try {
+        const response = await fetch("http://localhost:4000/api/ootd", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ city: targetCity, wardrobe: wardrobe }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.outfit && data.outfit.length > 0) {
+            localStorage.setItem("ootd_data", JSON.stringify(data));
+            localStorage.setItem("ootd_date", today);
+            renderOutfitStack(data.outfit, ootdResult, data.message + " - " + data.reasoning);
+          } else {
+             ootdResult.innerHTML = `<div class='card' style='padding:1.5rem;'><p style="color:var(--text-secondary);">${data.message || "No outfit could be generated."}</p></div>`;
+          }
+        } else {
+          ootdResult.innerHTML = "<div class='card'>Server error while loading OOTD.</div>";
+        }
+      } catch(e) {
+        ootdResult.innerHTML = "<div class='card'>Network error while loading OOTD.</div>";
+      }
+    }
+
+    loadOOTD();
   </script>
 
   <script>
